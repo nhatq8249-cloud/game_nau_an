@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiệm Bánh "Ko cần bt tên" - Offline Game</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      font-family: 'Fredoka', cursive, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #fde2e4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #5c4d7d;
+    }
+
+    #game-container {
+      width: 440px;
+      height: 730px;
+      background: #ffcad4;
+      border: 8px solid #fff;
+      border-radius: 35px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Màn hình Menu Chọn Mức Độ */
+    #start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #fff0f3;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 25px;
+      z-index: 200;
+      text-align: center;
+    }
+
+    .game-title {
+      font-size: 32px;
+      color: #ff4d6d;
+      margin-bottom: 5px;
+      text-shadow: 2px 2px 0px #fff;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: #8d99ae;
+      margin-bottom: 30px;
+    }
+
+    .difficulty-selection {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+      max-width: 280px;
+      margin-bottom: 25px;
+    }
+
+    .diff-card {
+      background: #fff;
+      border: 3px solid #ffcad4;
+      border-radius: 20px;
+      padding: 15px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #ffcad4;
+      transition: all 0.15s;
+    }
+
+    .diff-card:hover, .diff-card.selected {
+      border-color: #ff4d6d;
+      background: #ffe5ec;
+      transform: translateY(-2px);
+      box-shadow: 0 7px 0 #ff758f;
+    }
+
+    .diff-card.selected {
+      border-width: 4px;
+    }
+
+    .diff-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #ff4d6d;
+    }
+
+    .diff-desc {
+      font-size: 12px;
+      color: #6c757d;
+      margin-top: 4px;
+    }
+
+    .start-btn {
+      width: 100%;
+      max-width: 280px;
+      background: #52b788;
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+      padding: 12px 0;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #2d6a4f;
+      transition: all 0.1s;
+    }
+
+    .start-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #2d6a4f;
+    }
+
+    /* Màn hình Game chính */
+    #main-game {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+
+    .header {
+      background: #fff0f3;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 4px dashed #ffb3c1;
+    }
+
+    .status-box {
+      font-size: 16px;
+      font-weight: 600;
+      background: #fff;
+      padding: 5px 12px;
+      border-radius: 20px;
+      color: #ff4d6d;
+      box-shadow: 0 3px 0 #ffb3c1;
+    }
+
+    .badge {
+      background: #ff758f;
+      color: #fff;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .icon-btn {
+      background: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #ffb3c1;
+      transition: transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-btn:active {
+      transform: translateY(2px);
+    }
+
+    /* Khách hàng */
+    .customers-zone {
+      height: 230px;
+      background: #ffb3c1;
+      padding: 10px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .customer-card {
+      width: 125px;
+      height: 200px;
+      background: #fff;
+      border-radius: 20px;
+      border: 3px solid #ff758f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px;
+      position: relative;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+
+    .customer-avatar {
+      font-size: 42px;
+      margin-top: 5px;
+      animation: float 2s infinite ease-in-out alternate;
+    }
+
+    @keyframes float {
+      from { transform: translateY(0); }
+      to { transform: translateY(-5px); }
+    }
+
+    .order-bubble {
+      background: #fff0f3;
+      border: 2px solid #ff758f;
+      border-radius: 12px;
+      padding: 5px;
+      width: 100%;
+      text-align: center;
+      min-height: 55px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+
+    .order-item {
+      font-size: 18px;
+    }
+
+    .patience-bar-container {
+      width: 100%;
+      height: 10px;
+      background: #eee;
+      border-radius: 5px;
+      margin-top: auto;
+      overflow: hidden;
+      border: 1px solid #ddd;
+    }
+
+    .patience-bar {
+      height: 100%;
+      background: #52b788;
+      width: 100%;
+      transition: width 0.3s linear, background-color 0.5s;
+    }
+
+    /* Khay chế biến */
+    .workspace {
+      flex: 1;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+    }
+
+    .plate {
+      width: 170px;
+      height: 170px;
+      background: #f8f9fa;
+      border: 6px solid #e9ecef;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 4px 10px rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .plate-items {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      max-width: 140px;
+    }
+
+    .cake-item {
+      font-size: 28px;
+      animation: popIn 0.15s ease-out;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0); }
+      100% { transform: scale(1); }
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .btn {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 10px 0;
+      border: none;
+      border-radius: 18px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+      transition: all 0.1s;
+    }
+    .btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+    }
+
+    .btn-clear { background: #ff758f; color: #fff; }
+    .btn-serve { background: #52b788; color: #fff; }
+
+    /* Tủ nguyên liệu */
+    .pantry {
+      background: #fff0f3;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      border-top: 4px dashed #ffb3c1;
+    }
+
+    .ing-btn {
+      background: #fff;
+      border: 2px solid #ffcad4;
+      border-radius: 15px;
+      padding: 8px 0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 3px 0 #ffcad4;
+      transition: transform 0.1s;
+    }
+    .ing-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #ffcad4;
+    }
+
+    .ing-btn .icon { font-size: 26px; }
+    .ing-btn .label { font-size: 11px; color: #5c4d7d; font-weight: 600; margin-top: 2px; }
+
+    /* Toast */
+    .toast {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: rgba(255, 255, 255, 0.95);
+      padding: 12px 22px;
+      border-radius: 20px;
+      font-size: 17px;
+      font-weight: 600;
+      color: #ff4d6d;
+      border: 3px solid #ff758f;
+      pointer-events: none;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-align: center;
+      z-index: 100;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .toast.show {
+      transform: translate(-50%, -50%) scale(1);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-container">
+    <audio id="bg-music" loop>
+      <source src="sound.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- MÀN HÌNH MENU CHỌN MỨC ĐỘ -->
+    <div id="start-screen">
+      <div style="font-size: 60px; margin-bottom: 10px;">🍰</div>
+      <div class="game-title">Tiệm Bánh "Ko cần bt tên"</div>
+      <div class="subtitle">CHỌN LẸ ĐÊ =)))</div>
+
+      <div class="difficulty-selection">
+        <div class="diff-card selected" id="opt-easy" onclick="selectDifficulty(false)">
+          <div class="diff-title">Mức Dễ 🟢</div>
+          <div class="diff-desc">Không cần làm theo đúng thứ tự, chỉ cần đủ loại nguyên liệu!</div>
+        </div>
+
+        <div class="diff-card" id="opt-hard" onclick="selectDifficulty(true)">
+          <div class="diff-title">Mức Khó 🔴</div>
+          <div class="diff-desc">Ngược lại với mức độ ở trên(khó thì phải chịu :v)</div>
+        </div>
+      </div>
+
+      <button class="start-btn" onclick="startGame()">vào đê đợi cái giề🖕🏻</button>
+    </div>
+
+    <!-- MÀN HÌNH GAME CHÍNH -->
+    <div id="main-game" style="display: none;">
+      <!-- Header -->
+      <div class="header">
+        <button class="icon-btn" onclick="returnToMenu()" title="Về Menu">🏠</button>
+        <div class="status-box">🪙 <span id="score">0</span></div>
+        <div class="badge" id="mode-badge">Chế độ: Dễ</div>
+        <button class="icon-btn" id="sound-btn" onclick="toggleSound()">🎵</button>
+      </div>
+
+      <!-- Khách hàng -->
+      <div class="customers-zone">
+        <div class="customer-card" id="customer-0"></div>
+        <div class="customer-card" id="customer-1"></div>
+        <div class="customer-card" id="customer-2"></div>
+      </div>
+
+      <!-- Khay đĩa chế biến -->
+      <div class="workspace">
+        <div style="font-size: 14px; font-weight: 600; color: #8d99ae;">đặt vô đây nè má😑</div>
+        <div class="plate">
+          <div class="plate-items" id="plate-items"></div>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn-clear" onclick="clearPlate()">Vứt mọe đi🖕🏻 🗑️</button>
+          <button class="btn btn-serve" onclick="serveCustomer()">Ăn đê nhìn giề😏</button>
+        </div>
+
+        <div class="toast" id="toast"></div>
+      </div>
+
+      <!-- Tủ nguyên liệu -->
+      <div class="pantry">
+        <button class="ing-btn" onclick="addIngredient('🍞')"><span class="icon">🍞</span><span class="label">Bánh mỳ</span></button>
+        <button class="ing-btn" onclick="addIngredient('🥞')"><span class="icon">🥞</span><span class="label">Pancake</span></button>
+        <button class="ing-btn" onclick="addIngredient('🍫')"><span class="icon">🍫</span><span class="label">Socola</span></button>
+        <button class="ing-btn" onclick="addIngredient('🍓')"><span class="icon">🍓</span><span class="label">Dâu tây</span></button>
+        <button class="ing-btn" onclick="addIngredient('🥑')"><span class="icon">🥑</span><span class="label">Bơ</span></button>
+        <button class="ing-btn" onclick="addIngredient('🫐')"><span class="icon">🫐</span><span class="label">Việt quất</span></button>
+        <button class="ing-btn" onclick="addIngredient('🥛')"><span class="icon">🥛</span><span class="label">Sữa tươi</span></button>
+        <button class="ing-btn" onclick="addIngredient('🧋')"><span class="icon">🧋</span><span class="label">Trà sữa</span></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CUSTOMER_AVATARS = ['🐱', '🐰', '🐻', '🦊', '🐼', '🐸', '🐹', '🐥'];
+    const INGREDIENTS = ['🍞', '🥞', '🍫', '🍓', '🥑', '🫐', '🥛', '🧋'];
+
+    let score = 0;
+    let currentPlate = [];
+    let isMusicPlaying = false;
+    let isHardMode = false; 
+    let gameLoopRunning = false;
+    
+    let customers = [null, null, null];
+
+    const bgMusic = document.getElementById('bg-music');
+    const soundBtn = document.getElementById('sound-btn');
+
+    // Chọn độ khó trên menu
+    function selectDifficulty(hard) {
+      isHardMode = hard;
+      document.getElementById('opt-easy').classList.toggle('selected', !hard);
+      document.getElementById('opt-hard').classList.toggle('selected', hard);
+    }
+
+    // Bắt đầu game từ màn hình menu
+    function startGame() {
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('main-game').style.display = 'flex';
+      
+      const badge = document.getElementById('mode-badge');
+      badge.innerText = isHardMode ? "Chế độ: Khó" : "Chế độ: Dễ";
+      badge.style.background = isHardMode ? "#ff4d6d" : "#52b788";
+
+      // Bật nhạc nền nếu chưa phát
+      if (!isMusicPlaying) {
+        bgMusic.play().then(() => {
+          isMusicPlaying = true;
+          soundBtn.innerText = '🎵';
+        }).catch(() => {});
+      }
+
+      // Khởi tạo khách hàng
+      for (let i = 0; i < 3; i++) {
+        spawnCustomer(i);
+      }
+
+      if (!gameLoopRunning) {
+        gameLoopRunning = true;
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    // Quay lại menu
+    function returnToMenu() {
+      document.getElementById('main-game').style.display = 'none';
+      document.getElementById('start-screen').style.display = 'flex';
+      clearPlate();
+    }
+
+    // Sound effect
+    function playSfx(freq, duration) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + duration);
+        osc.stop(ctx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    function toggleSound() {
+      if (isMusicPlaying) {
+        bgMusic.pause();
+        soundBtn.innerText = '🔇';
+        isMusicPlaying = false;
+      } else {
+        bgMusic.play().then(() => {
+          soundBtn.innerText = '🎵';
+          isMusicPlaying = true;
+        }).catch(() => {});
+      }
+    }
+
+    function spawnCustomer(slotIndex) {
+      const avatar = CUSTOMER_AVATARS[Math.floor(Math.random() * CUSTOMER_AVATARS.length)];
+      const orderLength = Math.floor(Math.random() * 3) + 2;
+      const order = [];
+      for (let i = 0; i < orderLength; i++) {
+        order.push(INGREDIENTS[Math.floor(Math.random() * INGREDIENTS.length)]);
+      }
+
+      const totalPatience = (Math.floor(Math.random() * 120) + 180) * 1000; // 3 - 5 phút
+
+      customers[slotIndex] = {
+        avatar: avatar,
+        order: order,
+        maxPatience: totalPatience,
+        currentPatience: totalPatience,
+        startTime: Date.now()
+      };
+
+      renderCustomerSlot(slotIndex);
+    }
+
+    function renderCustomerSlot(index) {
+      const card = document.getElementById(`customer-${index}`);
+      const cust = customers[index];
+
+      if (!cust) {
+        card.innerHTML = `<div style="margin:auto; color:#ccc; font-size:12px;">Đang đợi...</div>`;
+        return;
+      }
+
+      card.innerHTML = `
+        <div class="order-bubble">
+          ${cust.order.map(item => `<span class="order-item">${item}</span>`).join('')}
+        </div>
+        <div class="customer-avatar">${cust.avatar}</div>
+        <div class="patience-bar-container">
+          <div class="patience-bar" id="patience-${index}"></div>
+        </div>
+      `;
+    }
+
+    function addIngredient(item) {
+      if (currentPlate.length >= 5) {
+        showToast("Đĩa đầy rồi! 🧁");
+        return;
+      }
+      playSfx(400, 0.08);
+      currentPlate.push(item);
+      renderPlate();
+    }
+
+    function renderPlate() {
+      const container = document.getElementById('plate-items');
+      container.innerHTML = currentPlate.map(item => `<span class="cake-item">${item}</span>`).join('');
+    }
+
+    function clearPlate() {
+      if (currentPlate.length > 0) playSfx(200, 0.1);
+      currentPlate = [];
+      renderPlate();
+    }
+
+    function isOrderMatching(plate, order) {
+      if (plate.length !== order.length) return false;
+
+      // Chế độ KHÓ: Phải trùng khớp đúng từng vị trí
+      if (isHardMode) {
+        return JSON.stringify(plate) === JSON.stringify(order);
+      } 
+      
+      // Chế độ DỄ: Không quan trọng thứ tự
+      const plateCopy = [...plate];
+      for (let item of order) {
+        const index = plateCopy.indexOf(item);
+        if (index === -1) return false;
+        plateCopy.splice(index, 1);
+      }
+      return true;
+    }
+
+    function serveCustomer() {
+      if (currentPlate.length === 0) return;
+
+      let served = false;
+
+      for (let i = 0; i < customers.length; i++) {
+        const cust = customers[i];
+        if (cust && isOrderMatching(currentPlate, cust.order)) {
+          const reward = isHardMode ? 25 : 15;
+          score += reward;
+          document.getElementById('score').innerText = score;
+          playSfx(600, 0.2);
+          showToast(`Đúng món rồi! +${reward}🪙`);
+          
+          customers[i] = null;
+          renderCustomerSlot(i);
+          clearPlate();
+          
+          setTimeout(() => spawnCustomer(i), 2000);
+          served = true;
+          break;
+        }
+      }
+
+      if (!served) {
+        playSfx(150, 0.2);
+        if (isHardMode) {
+          showToast("Mức khó: Cần xếp ĐÚNG THỨ TỰ! ❌");
+        } else {
+          showToast("Chưa đúng yêu cầu khách nào! 😿");
+        }
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1500);
+    }
+
+    function gameLoop() {
+      if (document.getElementById('main-game').style.display !== 'none') {
+        const now = Date.now();
+
+        for (let i = 0; i < customers.length; i++) {
+          const cust = customers[i];
+          if (cust) {
+            const elapsed = now - cust.startTime;
+            cust.currentPatience = Math.max(0, cust.maxPatience - elapsed);
+            
+            const bar = document.getElementById(`patience-${i}`);
+            if (bar) {
+              const pct = (cust.currentPatience / cust.maxPatience) * 100;
+              bar.style.width = pct + '%';
+
+              if (pct < 30) {
+                bar.style.backgroundColor = '#ff4d6d';
+              } else if (pct < 60) {
+                bar.style.backgroundColor = '#ffb703';
+              } else {
+                bar.style.backgroundColor = '#52b788';
+              }
+            }
+
+            if (cust.currentPatience <= 0) {
+              customers[i] = null;
+              renderCustomerSlot(i);
+              showToast("Giề mờ lâu vcl huhuhuhu 💔");
+              setTimeout(() => spawnCustomer(i), 3000);
+            }
+          }
+        }
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+  </script>
+</body>
+</html>
